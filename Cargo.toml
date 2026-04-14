@@ -1,0 +1,50 @@
+[package]
+name = "ownable"
+description = ""
+version = "0.1.0"
+authors = []
+edition = "2024"
+
+exclude = ["contract.wasm", "hash.txt"]
+
+[lib]
+name = "ownable"
+crate-type = ["cdylib", "rlib"]
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[features]
+backtraces = []
+library = []
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false
+codegen-units = 1
+panic = "abort"
+incremental = false
+overflow-checks = true
+
+[package.metadata.scripts]
+optimize = """docker run --rm -v "$(pwd)":/code \
+  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \
+  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
+  cosmwasm/rust-optimizer:0.12.6
+"""
+
+[dependencies]
+cosmwasm-std = "3"
+cw-storage-plus = "3"
+cw2 = "3"
+schemars = "0.8.8"
+serde = { version = "1.0.137", default-features = false, features = ["derive"] }
+thiserror = "1.0.31"
+ciborium = "0.2"
+ownable-std = "0.6"
+
+[dev-dependencies]
+cosmwasm-schema = "3"

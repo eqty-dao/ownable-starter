@@ -1,0 +1,30 @@
+target
+artifacts/
+node_modules/
+schema
+Cargo.lock
+/*.zip
+/assets/instantiate_msg.json
+/pkg
+.DS_Store
+.cargo-ok
+**/*.rs.bk
+
+# IDEs & AI Agents
+*.iml
+.idea
+.claude
+.worktrees
+
+# AI sandbox root
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.mcp.json
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc
+
