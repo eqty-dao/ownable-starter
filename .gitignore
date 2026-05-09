@@ -3,9 +3,10 @@ artifacts/
 node_modules/
 schema
 Cargo.lock
+/pkg/
+/schema/
 /*.zip
 /assets/instantiate_msg.json
-/pkg
 .DS_Store
 .cargo-ok
 **/*.rs.bk
@@ -27,4 +28,3 @@ Cargo.lock
 .vscode
 .zprofile
 .zshrc
-
