@@ -2,7 +2,9 @@
 
 Template repository for building a single-contract Ownable package in Rust.
 
-This repo is set up as a single crate (not a Cargo workspace) and is intended to be copied and customized for a new Ownable package.
+This repo is set up as a single crate and is intended to be copied and customized for a new Ownable package.
+
+`cargo pack` produces a distributable `<package-name>.zip` with the widget, wasm, package metadata, and schema files.
 
 ## What This Template Includes
 
@@ -26,3 +28,7 @@ This repo is set up as a single crate (not a Cargo workspace) and is intended to
    - `rustup target add wasm32-unknown-unknown`
 5. Build the Ownable package:
    - `cargo pack`
+
+`cargo wasm` builds only the contract wasm.
+
+`pkg/`, `schema/`, and `*.zip` are generated outputs.
