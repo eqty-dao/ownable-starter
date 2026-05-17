@@ -18,12 +18,6 @@ pub enum ContractError {
     #[error("Unknown event type: {val:?}")]
     MatchEventError { val: String },
 
-    #[error("Unknown chain id: {val:?}")]
-    MatchChainIdError { val: String },
-
-    #[error("Invalid external event args")]
-    InvalidExternalEventArgs {},
-
     #[error("Method is not implemented for this Ownable")]
     NotImplemented {},
 }

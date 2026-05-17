@@ -5,7 +5,7 @@ use cosmwasm_std::{Addr, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use cosmwasm_std::{Binary, to_json_binary};
 use cw2::set_contract_version;
 use crate::state::{Config, NFT_ITEM, CONFIG, METADATA, PACKAGE_CID, OWNABLE_INFO, NETWORK_ID};
-use ownable_std::{package_title_from_name, ExternalEventMsg, InfoResponse, Metadata, OwnableInfo};
+use ownable_std::{package_title_from_name, InfoResponse, Metadata, OwnableEvent, OwnableInfo, PublicEvent};
 
 // version info for migration info
 const CONTRACT_NAME: &str = concat!("crates.io:", env!("CARGO_PKG_NAME"));
@@ -87,11 +87,19 @@ pub fn try_transfer(info: MessageInfo, deps: DepsMut, to: Addr) -> Result<Respon
     )
 }
 
-pub fn register_external_event(
+pub fn register(
     info: MessageInfo,
     deps: DepsMut,
-    event: ExternalEventMsg,
-    _ownable_id: String,
+    event: PublicEvent,
+) -> Result<Response, ContractError> {
+    let _ = (info, deps);
+    Err(ContractError::MatchEventError { val: event.event_type })
+}
+
+pub fn ingest(
+    info: MessageInfo,
+    deps: DepsMut,
+    event: OwnableEvent,
 ) -> Result<Response, ContractError> {
     let _ = (info, deps);
     Err(ContractError::MatchEventError { val: event.event_type })
@@ -134,4 +142,46 @@ fn query_ownable_metadata(deps: Deps) -> StdResult<Binary> {
         animation_url: cw721.animation_url,
         youtube_url: cw721.youtube_url,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ingest, register};
+    use cosmwasm_std::testing::{mock_dependencies, mock_info};
+    use ownable_std::{OwnableEvent, OwnableEventSource, PublicEvent};
+    use serde_json::json;
+
+    #[test]
+    fn register_rejects_all_event_types() {
+        let mut deps = mock_dependencies();
+        let event = PublicEvent {
+            source: "0xsource".to_string(),
+            event_type: "consume".to_string(),
+            data: vec![0x01, 0x02].into(),
+            block_number: 1,
+            transaction_hash: vec![0xaa].into(),
+            transaction_index: 0,
+            log_index: 0,
+        };
+
+        let err = register(mock_info("owner", &[]), deps.as_mut(), event).unwrap_err();
+        assert_eq!(err.to_string(), "Unknown event type: \"consume\"");
+    }
+
+    #[test]
+    fn ingest_rejects_all_event_types() {
+        let mut deps = mock_dependencies();
+        let event = OwnableEvent {
+            source: OwnableEventSource {
+                id: "source-id".to_string(),
+                owner: "owner".to_string(),
+                issuer: "issuer".to_string(),
+            },
+            event_type: "consume".to_string(),
+            attributes: json!({"amount": 1}),
+        };
+
+        let err = ingest(mock_info("owner", &[]), deps.as_mut(), event).unwrap_err();
+        assert_eq!(err.to_string(), "Unknown event type: \"consume\"");
+    }
 }
