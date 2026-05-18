@@ -5,7 +5,10 @@ use cosmwasm_std::{Addr, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use cosmwasm_std::{Binary, to_json_binary};
 use cw2::set_contract_version;
 use crate::state::{Config, NFT_ITEM, CONFIG, METADATA, PACKAGE_CID, OWNABLE_INFO, NETWORK_ID};
-use ownable_std::{package_title_from_name, InfoResponse, Metadata, OwnableEvent, OwnableInfo, PublicEvent};
+use ownable_std::{
+    package_title_from_name, EncodePublicEventRequest, InfoResponse, Metadata, OwnableEvent,
+    OwnableInfo, PublicEvent,
+};
 
 // version info for migration info
 const CONTRACT_NAME: &str = concat!("crates.io:", env!("CARGO_PKG_NAME"));
@@ -105,6 +108,14 @@ pub fn ingest(
     Err(ContractError::MatchEventError { val: event.event_type })
 }
 
+pub fn encode_public_event(
+    request: EncodePublicEventRequest,
+) -> Result<Vec<u8>, ContractError> {
+    Err(ContractError::MatchEventError {
+        val: request.event_type,
+    })
+}
+
 
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
@@ -146,10 +157,17 @@ fn query_ownable_metadata(deps: Deps) -> StdResult<Binary> {
 
 #[cfg(test)]
 mod tests {
-    use super::{ingest, register};
-    use cosmwasm_std::testing::{mock_dependencies, mock_info};
-    use ownable_std::{OwnableEvent, OwnableEventSource, PublicEvent};
+    use super::{encode_public_event, ingest, register};
+    use cosmwasm_std::{testing::mock_dependencies, Addr, MessageInfo};
+    use ownable_std::{EncodePublicEventRequest, OwnableEvent, OwnableEventSource, PublicEvent};
     use serde_json::json;
+
+    fn mock_info(sender: &str) -> MessageInfo {
+        MessageInfo {
+            sender: Addr::unchecked(sender),
+            funds: vec![],
+        }
+    }
 
     #[test]
     fn register_rejects_all_event_types() {
@@ -164,7 +182,7 @@ mod tests {
             log_index: 0,
         };
 
-        let err = register(mock_info("owner", &[]), deps.as_mut(), event).unwrap_err();
+        let err = register(mock_info("owner"), deps.as_mut(), event).unwrap_err();
         assert_eq!(err.to_string(), "Unknown event type: \"consume\"");
     }
 
@@ -181,7 +199,18 @@ mod tests {
             attributes: json!({"amount": 1}),
         };
 
-        let err = ingest(mock_info("owner", &[]), deps.as_mut(), event).unwrap_err();
+        let err = ingest(mock_info("owner"), deps.as_mut(), event).unwrap_err();
+        assert_eq!(err.to_string(), "Unknown event type: \"consume\"");
+    }
+
+    #[test]
+    fn encode_public_event_rejects_all_event_types() {
+        let request = EncodePublicEventRequest {
+            event_type: "consume".to_string(),
+            data: vec![0xa0].into(),
+        };
+
+        let err = encode_public_event(request).unwrap_err();
         assert_eq!(err.to_string(), "Unknown event type: \"consume\"");
     }
 }
