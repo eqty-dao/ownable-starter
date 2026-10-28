@@ -1,6 +1,6 @@
 use cosmwasm_std::{
-    Addr, from_json,
-    testing::{mock_dependencies, mock_env, mock_info},
+    Addr, MessageInfo, from_json,
+    testing::{mock_dependencies, mock_env},
 };
 use ownable::{
     contract::{instantiate, query},
@@ -19,10 +19,17 @@ fn instantiate_msg() -> InstantiateMsg {
     }
 }
 
+fn mock_info(sender: &str) -> MessageInfo {
+    MessageInfo {
+        sender: Addr::unchecked(sender),
+        funds: vec![],
+    }
+}
+
 #[test]
 fn instantiate_and_queries_preserve_ownable_state_without_nft_identity() {
     let mut deps = mock_dependencies();
-    let sender = mock_info("issuer", &[]);
+    let sender = mock_info("issuer");
 
     instantiate(deps.as_mut(), mock_env(), sender, instantiate_msg()).expect("instantiate ownable");
 
