@@ -1,8 +1,7 @@
-use cosmwasm_std::{Addr};
+use cosmwasm_std::Addr;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use ownable_std::{
-    NFT,
     ownables_transfer,
     ownables_query_info, ownables_query_metadata,
     ownables_query_widget_state, ownables_instantiate_msg
