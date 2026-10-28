@@ -1,7 +1,6 @@
 use cosmwasm_std::{
-    from_json,
+    Addr, from_json,
     testing::{mock_dependencies, mock_env, mock_info},
-    Addr,
 };
 use ownable::{
     contract::{instantiate, query},
@@ -25,13 +24,7 @@ fn instantiate_and_queries_preserve_ownable_state_without_nft_identity() {
     let mut deps = mock_dependencies();
     let sender = mock_info("issuer", &[]);
 
-    instantiate(
-        deps.as_mut(),
-        mock_env(),
-        sender,
-        instantiate_msg(),
-    )
-    .expect("instantiate ownable");
+    instantiate(deps.as_mut(), mock_env(), sender, instantiate_msg()).expect("instantiate ownable");
 
     assert_eq!(NETWORK_ID.load(deps.as_ref().storage).unwrap(), 1);
     assert_eq!(
@@ -47,8 +40,8 @@ fn instantiate_and_queries_preserve_ownable_state_without_nft_identity() {
         Addr::unchecked("issuer")
     );
 
-    let info_response = query(deps.as_ref(), mock_env(), QueryMsg::GetInfo {})
-        .expect("query ownable info");
+    let info_response =
+        query(deps.as_ref(), mock_env(), QueryMsg::GetInfo {}).expect("query ownable info");
     let info: InfoResponse = from_json(info_response.clone()).expect("deserialize ownable info");
     assert_eq!(info.owner, Addr::unchecked("issuer"));
     assert_eq!(info.issuer, Addr::unchecked("issuer"));
@@ -57,8 +50,8 @@ fn instantiate_and_queries_preserve_ownable_state_without_nft_identity() {
     let info_json: Value = serde_json::from_slice(info_response.as_slice()).expect("info JSON");
     assert!(info_json.get("nft").is_none());
 
-    let metadata_response = query(deps.as_ref(), mock_env(), QueryMsg::GetMetadata {})
-        .expect("query ownable metadata");
+    let metadata_response =
+        query(deps.as_ref(), mock_env(), QueryMsg::GetMetadata {}).expect("query ownable metadata");
     let metadata: Metadata = from_json(metadata_response).expect("deserialize ownable metadata");
     assert_eq!(metadata.name.as_deref(), Some("Ownable"));
     assert_eq!(metadata.description.as_deref(), Some(""));
